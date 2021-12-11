@@ -1,77 +1,85 @@
 import './App.css';
 
 function App() {
-
-  let n = 0;
-  let j = 0;
-  let k;
   let arr;
-  let numArr;
-  let rowArr;
-  let wsregex = /\s+/
-  let countArr = [];
-  let numIndex;
-  let finished = false;
-  let ans = "";
+  let n;
+  let j;
+  let rgx = /[0-9]+/g
+  let testArr;
+  let ansArr = {};
+  let ans = 0;
+
 
   const Answer = () => {
     fetch("./values.txt")
     .then((res) => res.text())
     .then((txt) => {
-      arr = txt.split("\r\n").filter((val)=>val!=="")
-      numArr = arr.splice(0,1)[0].split(",")
-    
-      for (;n < numArr.length; n++){
-        // if (finished){
-        //   break
-        // }
-        for (j = 0; j < arr.length; j++){
-          // if (finished){
-          //   break
-          // }
-
-          if (!countArr[j%5+Math.floor(j/5)*10]){
-            countArr[j%5+Math.floor(j/5)*10] = 0
+      arr = txt.split("\r\n")
+      for (n = 0; n < arr.length; n++){
+        testArr = arr[n].match(rgx)
+        // console.log(testArr)
+        if (testArr[0] !== testArr[2] && testArr[1] !== testArr[3]){
+          continue
+        }
+        else if (testArr[0] === testArr[2]){
+          if (!ansArr[testArr[0]]){
+            ansArr[testArr[0]] = {}
           }
-
-          rowArr = arr[j].trim().split(wsregex)
-
-          if (rowArr.includes(numArr[n])){
-
-            numIndex = rowArr.indexOf(numArr[n])
-
-            countArr[j%5+Math.floor(j/5)*10]++
-
-            if (!countArr[5+Math.floor(j/5)*10+numIndex]){
-              countArr[5+Math.floor(j/5)*10+numIndex] = 1
-            }
-            else {
-              countArr[5+Math.floor(j/5)*10+numIndex]++
-            }
-
-            if (countArr[j%5+Math.floor(j/5)*10] === 5 || countArr[5+Math.floor(j/5)*10+numIndex] === 5){
-              finished = true;
-              ans = ""
-              console.log(rowArr, j, countArr[j%5+Math.floor(j/5)*10], countArr[5+Math.floor(j/5)*10+numIndex])
-              console.log(numArr[n], n)
-              
-              for (k = Math.floor(j/5)*5; k < Math.floor(j/5)*5+5; k++){
-                ans = ans + arr[k].trim() + " ";
+          if (testArr[1] < testArr[3]){
+            for (j = testArr[1]; j <= testArr[3]; j++){
+              if (!ansArr[testArr[0]][j]){
+                ansArr[testArr[0]][j] = 1
               }
-
-              ans = ans.trim().split(wsregex)
-
-              for (k = 0; k <= n; k++){
-                ans = ans.filter(val => val !== numArr[k])
+              else{
+                ansArr[testArr[0]][j]++
               }
-              console.log(ans.reduce((a,b)=>parseInt(a)+parseInt(b))*numArr[n])
-              arr.splice(Math.floor(j/5)*5, 5)
-              countArr.splice(Math.floor(j/5)*10, 10)
-              j = Math.floor(j/5)*5-1
+            }
+          }
+          else if (testArr[1] > testArr[3]){
+            for (j = testArr[3]; j <=testArr[1]; j++){
+              if (!ansArr[testArr[0]][j]){
+                ansArr[testArr[0]][j] = 1
+              }
+              else{
+                ansArr[testArr[0]][j]++
+              }
+            }
+          }
+        }
+        else if (testArr[1] === testArr[3]){
+          if (!ansArr[testArr[1]]){
+            ansArr[testArr[1]] = {}
+          }
+          if (testArr[0] < testArr[2]){
+            for (j = testArr[0]; j <= testArr[2]; j++){
+              if (!ansArr[testArr[1]][j]){
+                ansArr[testArr[1]][j] = 1
+              }
+              else{
+                ansArr[testArr[1]][j]++
+              }
+            }
+          }
+          else if (testArr[0] > testArr[2]){
+            for (j = testArr[2]; j <=testArr[0]; j++){
+              if (!ansArr[testArr[1]][j]){
+                ansArr[testArr[1]][j] = 1
+              }
+              else{
+                ansArr[testArr[1]][j]++
+              }
             }
           }
         }
       }
+      Object.values(ansArr).forEach(obj=>{
+        Object.values(obj).forEach((val)=>{
+          if (val > 1){
+            ans++
+          }
+        })
+      })
+      console.log(ans)
     })
   };
   Answer();
